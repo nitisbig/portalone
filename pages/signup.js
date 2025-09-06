@@ -1,4 +1,5 @@
 import { Container, TextField, Button, Box, Typography, Link } from '@mui/material';
+import GoogleIcon from '@mui/icons-material/Google';
 import NextLink from 'next/link';
 
 export default function SignUp() {
@@ -12,6 +13,9 @@ export default function SignUp() {
           <TextField margin="normal" required fullWidth name="password" label="Password" type="password" autoComplete="new-password" />
           <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
             Sign Up
+          </Button>
+          <Button fullWidth variant="contained" color="primary" startIcon={<GoogleIcon />} sx={{ mb: 2 }}>
+            Continue with Google
           </Button>
           <Link component={NextLink} href="/login" variant="body2">
             {"Already have an account? Sign In"}
