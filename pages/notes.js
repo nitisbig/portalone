@@ -52,7 +52,7 @@ export default function Notes() {
       .from('notes')
       .select('*')
       .eq('user_id', currentSession.user.id)
-      .order('createdon', { ascending: false });
+      .order('created_at', { ascending: false });
     if (!error) {
       setNotes(data);
     }
@@ -66,8 +66,7 @@ export default function Notes() {
       .insert({
         user_id: session.user.id,
         title,
-        content,
-        createdon: new Date().toISOString()
+        content
       })
       .select();
     if (error) {
@@ -132,7 +131,7 @@ export default function Notes() {
                     display="block"
                     sx={{ mt: 1 }}
                   >
-                    {new Date(note.createdon).toLocaleString()}
+                    {new Date(note.created_at).toLocaleString()}
                   </Typography>
                 </CardContent>
               </Card>
