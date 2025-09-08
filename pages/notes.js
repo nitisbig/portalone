@@ -9,6 +9,7 @@ import {
   Grid,
   Card,
   CardContent,
+  IconButton,
   Avatar,
   Fab,
   Dialog,
@@ -17,6 +18,8 @@ import {
   DialogActions
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import supabase from '../lib/supabaseClient';
 
 export default function Notes() {
@@ -26,6 +29,8 @@ export default function Notes() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [open, setOpen] = useState(false);
+  const [editingNote, setEditingNote] = useState(null);
+  const [activeNoteId, setActiveNoteId] = useState(null);
   const userName =
     session?.user?.user_metadata?.name ||
     session?.user?.email?.split('@')[0] ||
@@ -61,36 +66,73 @@ export default function Notes() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!session) return;
-    const { data, error } = await supabase
-      .from('notes')
-      .insert({
-        user_id: session.user.id,
-        title,
-        content
-      })
-      .select();
-    if (error) {
-      alert(`Error saving note: ${error.message}`);
-      return;
+    if (editingNote) {
+      const { data, error } = await supabase
+        .from('notes')
+        .update({ title, content })
+        .eq('id', editingNote.id)
+        .select();
+      if (error) {
+        alert(`Error updating note: ${error.message}`);
+        return;
+      }
+      if (data) {
+        setNotes((prev) =>
+          prev.map((n) => (n.id === editingNote.id ? data[0] : n))
+        );
+      }
+    } else {
+      const { data, error } = await supabase
+        .from('notes')
+        .insert({
+          user_id: session.user.id,
+          title,
+          content
+        })
+        .select();
+      if (error) {
+        alert(`Error saving note: ${error.message}`);
+        return;
+      }
+      if (data) {
+        setNotes((prev) => [...data, ...prev]);
+      }
     }
-    if (data) {
-      setNotes((prev) => [...data, ...prev]);
-      setTitle('');
-      setContent('');
-      setOpen(false);
-    }
+    setTitle('');
+    setContent('');
+    setEditingNote(null);
+    setOpen(false);
   };
 
   const handleOpen = () => {
     setTitle('');
     setContent('');
     setOpen(true);
+    setEditingNote(null);
   };
 
   const handleClose = () => {
     setOpen(false);
     setTitle('');
     setContent('');
+    setEditingNote(null);
+  };
+
+  const handleEdit = (note) => {
+    setTitle(note.title);
+    setContent(note.content);
+    setEditingNote(note);
+    setOpen(true);
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Delete this note?')) return;
+    const { error } = await supabase.from('notes').delete().eq('id', id);
+    if (error) {
+      alert(`Error deleting note: ${error.message}`);
+      return;
+    }
+    setNotes((prev) => prev.filter((n) => n.id !== id));
   };
 
   return (
@@ -119,7 +161,12 @@ export default function Notes() {
         <Grid container spacing={2}>
           {notes.map((note) => (
             <Grid item xs={12} sm={6} md={4} key={note.id}>
-              <Card>
+              <Card
+                onMouseEnter={() => setActiveNoteId(note.id)}
+                onMouseLeave={() => setActiveNoteId(null)}
+                onTouchStart={() => setActiveNoteId(note.id)}
+                sx={{ position: 'relative' }}
+              >
                 <CardContent>
                   <Typography variant="h6" gutterBottom>
                     {note.title}
@@ -134,6 +181,33 @@ export default function Notes() {
                     {new Date(note.created_at).toLocaleString()}
                   </Typography>
                 </CardContent>
+                <Box
+                  className="note-actions"
+                  sx={{
+                    position: 'absolute',
+                    top: 8,
+                    right: 8,
+                    display: 'flex',
+                    gap: 1,
+                    opacity: activeNoteId === note.id ? 1 : 0,
+                    transition: 'opacity 0.3s'
+                  }}
+                >
+                  <IconButton
+                    size="small"
+                    color="primary"
+                    onClick={() => handleEdit(note)}
+                  >
+                    <EditIcon fontSize="small" />
+                  </IconButton>
+                  <IconButton
+                    size="small"
+                    color="error"
+                    onClick={() => handleDelete(note.id)}
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </Box>
               </Card>
             </Grid>
           ))}
@@ -149,7 +223,7 @@ export default function Notes() {
       </Fab>
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
         <Box component="form" onSubmit={handleSubmit}>
-          <DialogTitle>Create Note</DialogTitle>
+          <DialogTitle>{editingNote ? 'Edit Note' : 'Create Note'}</DialogTitle>
           <DialogContent>
             <TextField
               label="Title"
@@ -173,7 +247,7 @@ export default function Notes() {
           <DialogActions>
             <Button onClick={handleClose}>Cancel</Button>
             <Button type="submit" variant="contained">
-              Create
+              {editingNote ? 'Update' : 'Create'}
             </Button>
           </DialogActions>
         </Box>
