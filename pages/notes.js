@@ -8,7 +8,8 @@ import {
   Typography,
   Grid,
   Card,
-  CardContent
+  CardContent,
+  Avatar
 } from '@mui/material';
 import supabase from '../lib/supabaseClient';
 
@@ -18,6 +19,10 @@ export default function Notes() {
   const [notes, setNotes] = useState([]);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const userName =
+    session?.user?.user_metadata?.name ||
+    session?.user?.email?.split('@')[0] ||
+    '';
 
   useEffect(() => {
     const init = async () => {
@@ -71,7 +76,24 @@ export default function Notes() {
   return (
     <Container maxWidth="md">
       <Box sx={{ mt: 8 }}>
-        <Typography component="h1" variant="h4" gutterBottom>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+            mb: 4
+          }}
+        >
+          <Avatar
+            alt={userName}
+            src={session?.user?.user_metadata?.avatar_url}
+            sx={{ width: 56, height: 56 }}
+          />
+          <Typography component="h1" variant="h4">
+            {`Hello ${userName}`}
+          </Typography>
+        </Box>
+        <Typography component="h2" variant="h5" gutterBottom>
           My Notes
         </Typography>
         <Box component="form" onSubmit={handleSubmit} sx={{ mb: 4 }}>
