@@ -16,6 +16,8 @@ Run the development server:
 npm run dev
 ```
 
+Once signed in you can manage personal notes at `/notes`. Only authenticated users are able to create and view their notes, which are stored using Supabase.
+
 ## Environment Variables
 
 Create a `.env.local` file in the project root with the following values:
