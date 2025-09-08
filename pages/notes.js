@@ -29,16 +29,17 @@ export default function Notes() {
         return;
       }
       setSession(session);
-      fetchNotes(session.user.id);
+      fetchNotes(session);
     };
     init();
   }, [router]);
 
-  const fetchNotes = async (userId) => {
+  const fetchNotes = async (currentSession = session) => {
+    if (!currentSession) return;
     const { data, error } = await supabase
       .from('notes')
       .select('*')
-      .eq('user_id', userId)
+      .eq('user_id', currentSession.user.id)
       .order('id', { ascending: false });
     if (!error) {
       setNotes(data);
@@ -56,7 +57,7 @@ export default function Notes() {
     if (!error) {
       setTitle('');
       setContent('');
-      fetchNotes(session.user.id);
+      fetchNotes();
     }
   };
 
