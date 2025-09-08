@@ -52,7 +52,7 @@ export default function Notes() {
       .from('notes')
       .select('*')
       .eq('user_id', currentSession.user.id)
-      .order('id', { ascending: false });
+      .order('createdon', { ascending: false });
     if (!error) {
       setNotes(data);
     }
@@ -66,7 +66,8 @@ export default function Notes() {
       .insert({
         user_id: session.user.id,
         title,
-        content
+        content,
+        createdon: new Date().toISOString()
       })
       .select();
     if (error) {
@@ -125,6 +126,14 @@ export default function Notes() {
                     {note.title}
                   </Typography>
                   <Typography variant="body2">{note.content}</Typography>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    display="block"
+                    sx={{ mt: 1 }}
+                  >
+                    {new Date(note.createdon).toLocaleString()}
+                  </Typography>
                 </CardContent>
               </Card>
             </Grid>
