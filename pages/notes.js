@@ -9,8 +9,14 @@ import {
   Grid,
   Card,
   CardContent,
-  Avatar
+  Avatar,
+  Fab,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 import supabase from '../lib/supabaseClient';
 
 export default function Notes() {
@@ -19,6 +25,7 @@ export default function Notes() {
   const [notes, setNotes] = useState([]);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const [open, setOpen] = useState(false);
   const userName =
     session?.user?.user_metadata?.name ||
     session?.user?.email?.split('@')[0] ||
@@ -70,7 +77,20 @@ export default function Notes() {
       setNotes((prev) => [...data, ...prev]);
       setTitle('');
       setContent('');
+      setOpen(false);
     }
+  };
+
+  const handleOpen = () => {
+    setTitle('');
+    setContent('');
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    setTitle('');
+    setContent('');
   };
 
   return (
@@ -96,29 +116,6 @@ export default function Notes() {
         <Typography component="h2" variant="h5" gutterBottom>
           My Notes
         </Typography>
-        <Box component="form" onSubmit={handleSubmit} sx={{ mb: 4 }}>
-          <TextField
-            label="Title"
-            fullWidth
-            margin="normal"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-          />
-          <TextField
-            label="Content"
-            fullWidth
-            margin="normal"
-            multiline
-            rows={4}
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            required
-          />
-          <Button type="submit" variant="contained">
-            Add Note
-          </Button>
-        </Box>
         <Grid container spacing={2}>
           {notes.map((note) => (
             <Grid item xs={12} sm={6} md={4} key={note.id}>
@@ -134,6 +131,45 @@ export default function Notes() {
           ))}
         </Grid>
       </Box>
+      <Fab
+        color="primary"
+        sx={{ position: 'fixed', bottom: 16, right: 16 }}
+        onClick={handleOpen}
+        aria-label="add"
+      >
+        <AddIcon />
+      </Fab>
+      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+        <Box component="form" onSubmit={handleSubmit}>
+          <DialogTitle>Create Note</DialogTitle>
+          <DialogContent>
+            <TextField
+              label="Title"
+              fullWidth
+              margin="normal"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+            />
+            <TextField
+              label="Content"
+              fullWidth
+              margin="normal"
+              multiline
+              rows={4}
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              required
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose}>Cancel</Button>
+            <Button type="submit" variant="contained">
+              Create
+            </Button>
+          </DialogActions>
+        </Box>
+      </Dialog>
     </Container>
   );
 }
