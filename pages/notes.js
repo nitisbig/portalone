@@ -52,7 +52,7 @@ export default function Notes() {
       .from('notes')
       .select('*')
       .eq('user_id', currentSession.user.id)
-      .order('id', { ascending: false });
+      .order('created_at', { ascending: false });
     if (!error) {
       setNotes(data);
     }
@@ -125,6 +125,14 @@ export default function Notes() {
                     {note.title}
                   </Typography>
                   <Typography variant="body2">{note.content}</Typography>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    display="block"
+                    sx={{ mt: 1 }}
+                  >
+                    {new Date(note.created_at).toLocaleString()}
+                  </Typography>
                 </CardContent>
               </Card>
             </Grid>
