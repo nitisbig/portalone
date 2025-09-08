@@ -20,12 +20,16 @@ export default function Login() {
       console.error(error.message);
     } else {
       setErrorMessage('');
-      router.push('/dashboard');
+      router.push('/notes');
     }
   };
 
   const handleGoogle = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
+    const origin = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: `${origin}/notes` }
+    });
     if (error) console.error(error.message);
   };
 
