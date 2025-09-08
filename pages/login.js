@@ -2,10 +2,12 @@ import { Container, TextField, Button, Box, Typography, Link } from '@mui/materi
 import GoogleIcon from '@mui/icons-material/Google';
 import NextLink from 'next/link';
 import { useRouter } from 'next/router';
+import { useState } from 'react';
 import supabase from '../lib/supabaseClient';
 
 export default function Login() {
   const router = useRouter();
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -14,9 +16,11 @@ export default function Login() {
     const password = data.get('password');
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
+      setErrorMessage('User not registered');
       console.error(error.message);
     } else {
-      router.push('/');
+      setErrorMessage('');
+      router.push('/dashboard');
     }
   };
 
@@ -32,6 +36,11 @@ export default function Login() {
         <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
           <TextField margin="normal" required fullWidth label="Email Address" name="email" autoComplete="email" autoFocus />
           <TextField margin="normal" required fullWidth name="password" label="Password" type="password" autoComplete="current-password" />
+          {errorMessage && (
+            <Typography color="error" variant="body2">
+              {errorMessage}
+            </Typography>
+          )}
           <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
             Sign In
           </Button>
