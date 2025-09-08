@@ -13,17 +13,19 @@ export default function SignUp() {
     const email = data.get('email');
     const password = data.get('password');
     const name = data.get('name');
+    const origin = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { name }
+        data: { name },
+        emailRedirectTo: `${origin}/verify`
       }
     });
     if (error) {
       console.error(error.message);
     } else {
-      router.push('/');
+      router.push('/check-email');
     }
   };
 
