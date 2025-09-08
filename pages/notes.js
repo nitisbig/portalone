@@ -6,9 +6,9 @@ import {
   Button,
   Box,
   Typography,
-  List,
-  ListItem,
-  ListItemText
+  Grid,
+  Card,
+  CardContent
 } from '@mui/material';
 import supabase from '../lib/supabaseClient';
 
@@ -49,20 +49,27 @@ export default function Notes() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!session) return;
-    const { error } = await supabase.from('notes').insert({
-      user_id: session.user.id,
-      title,
-      content
-    });
-    if (!error) {
+    const { data, error } = await supabase
+      .from('notes')
+      .insert({
+        user_id: session.user.id,
+        title,
+        content
+      })
+      .select();
+    if (error) {
+      alert(`Error saving note: ${error.message}`);
+      return;
+    }
+    if (data) {
+      setNotes((prev) => [...data, ...prev]);
       setTitle('');
       setContent('');
-      fetchNotes();
     }
   };
 
   return (
-    <Container maxWidth="sm">
+    <Container maxWidth="md">
       <Box sx={{ mt: 8 }}>
         <Typography component="h1" variant="h4" gutterBottom>
           My Notes
@@ -90,13 +97,20 @@ export default function Notes() {
             Add Note
           </Button>
         </Box>
-        <List>
+        <Grid container spacing={2}>
           {notes.map((note) => (
-            <ListItem key={note.id} alignItems="flex-start">
-              <ListItemText primary={note.title} secondary={note.content} />
-            </ListItem>
+            <Grid item xs={12} sm={6} md={4} key={note.id}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    {note.title}
+                  </Typography>
+                  <Typography variant="body2">{note.content}</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
           ))}
-        </List>
+        </Grid>
       </Box>
     </Container>
   );
