@@ -16,6 +16,7 @@
     "@mui/material": "5.15.11",
     "@mui/icons-material": "5.15.11",
     "@emotion/react": "11.11.1",
-    "@emotion/styled": "11.11.0"
+    "@emotion/styled": "11.11.0",
+    "@supabase/supabase-js": "^2.43.1"
   }
 }
